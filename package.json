@@ -1,0 +1,33 @@
+{
+  "name": "aws-cdk-and-lambda-workshop",
+  "version": "0.1.0",
+  "bin": {
+    "app": "bin/app.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@aws-cdk/assert": "^0.39.0",
+    "@types/jest": "^24.0.18",
+    "@types/node": "^12.7.12",
+    "aws-cdk": "^0.39.0",
+    "aws-sdk": "^2.546.0",
+    "jest": "^24.9.0",
+    "ts-jest": "^24.0.2",
+    "ts-node": "^8.1.0",
+    "typescript": "~3.6.2"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-apigateway": "^0.39.0",
+    "@aws-cdk/aws-dynamodb": "^0.39.0",
+    "@aws-cdk/aws-lambda": "^0.39.0",
+    "@aws-cdk/aws-s3": "^0.39.0",
+    "@aws-cdk/aws-s3-deployment": "^0.39.0",
+    "@aws-cdk/core": "^0.39.0",
+    "source-map-support": "^0.5.9"
+  }
+}
