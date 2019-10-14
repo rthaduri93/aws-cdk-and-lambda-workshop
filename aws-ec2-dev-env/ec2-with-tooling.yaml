@@ -1,0 +1,90 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: EC2 instance with tools installed by user data script
+Parameters:
+  KeyName:
+    Description: Your SSH key pair for SSHing into the instance
+    Type: AWS::EC2::KeyPair::KeyName
+  UserTag:
+    Description: Your FirstName.LastName (e.g. Max.Mustermann) for tagging the AWS resources
+    Type: String
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t3.small
+  LatestAmiId:
+    Description: AMI ID
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+Resources:
+  Ec2WithTooling:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType:
+        Ref: InstanceType
+      SecurityGroups:
+        - Ref: SecurityGroup
+      KeyName:
+        Ref: KeyName
+      ImageId:
+        Ref: LatestAmiId
+      UserData:
+        Fn::Base64: |
+          #!/usr/bin/env bash
+          yum -y update
+          yum -y install git jq
+          NVM_VERSION=v0.35.0
+          NODEJS_VERSION=12.12.0
+          AWS_CDK_VERSION=0.39.0
+          INSTALL_TOOLS_CMD=$(cat <<EOF
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash
+            export NVM_DIR="\$HOME/.nvm"
+            source "\$NVM_DIR/nvm.sh"
+            nvm install ${NODEJS_VERSION} --latest-npm
+            npm install -g aws-cdk@${AWS_CDK_VERSION}
+          EOF
+          )
+          su -c "${INSTALL_TOOLS_CMD}" - ec2-user
+      Tags:
+        - Key: owner
+          Value:
+            Ref: UserTag
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIpv6: ::0/0
+      Tags:
+        - Key: owner
+          Value:
+            Ref: UserTag
+Outputs:
+  InstanceId:
+    Description: InstanceId of the newly created EC2 instance
+    Value:
+      Ref: Ec2WithTooling
+  AZ:
+    Description: Availability Zone of the newly created EC2 instance
+    Value:
+      Fn::GetAtt:
+        - Ec2WithTooling
+        - AvailabilityZone
+  PublicDNS:
+    Description: Public DNSName of the newly created EC2 instance
+    Value:
+      Fn::GetAtt:
+        - Ec2WithTooling
+        - PublicDnsName
+  PublicIP:
+    Description: Public IP address of the newly created EC2 instance
+    Value:
+      Fn::GetAtt:
+        - Ec2WithTooling
+        - PublicIp
