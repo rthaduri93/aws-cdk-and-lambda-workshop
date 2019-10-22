@@ -11,7 +11,7 @@ export class FrontendStack extends cdk.Stack {
       publicReadAccess: true
     });
     new s3Deploy.BucketDeployment(this, "WebUIDeployment", {
-      source: s3Deploy.Source.asset("webui"),
+      sources: [s3Deploy.Source.asset("webui")],
       destinationBucket: bucket
     });
   }
