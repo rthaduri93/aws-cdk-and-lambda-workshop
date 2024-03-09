@@ -1,0 +1,35 @@
+import * as cdk from '@aws-cdk/core';
+import * as cloudtrail from '@aws-cdk/aws-cloudtrail';
+import * as kms from '@aws-cdk/aws-kms';
+
+export class MyCloudtrailAppStack extends cdk.Stack {
+  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    // Create a KMS key for CloudTrail encryption
+    const cloudTrailKey = new kms.Key(this, 'CloudTrailKey', {
+      alias: 'veerum-lab-cloudtrail-key',
+    });
+
+    // Create CloudTrail trail
+    new cloudtrail.Trail(this, 'MyCloudTrail', {
+      trailName: 'veerum-lab-cloudtrail',
+      isMultiRegionTrail: true,
+      includeGlobalServiceEvents: true,
+      enableFileValidation: true,
+      kmsKey: cloudTrailKey,
+      sendToCloudWatchLogs: true,
+      cloudWatchLogsRetention: cloudtrail.RetentionDays.ONE_WEEK, // Adjust retention as needed
+    });
+
+    // Print CloudTrail ARN to the console
+    new cdk.CfnOutput(this, 'CloudTrailARN', {
+      value: trail.trailArn,
+    });
+  }
+}
+
+const app = new cdk.App();
+new CloudTrailStack(app, 'VeerumLabCloudTrailStack');
+  }
+}
